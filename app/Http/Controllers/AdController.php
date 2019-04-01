@@ -1,3 +1,4 @@
+
 <?php
 
 namespace App\Http\Controllers;
@@ -67,13 +68,14 @@ class AdController extends Controller{
         $ads = $all->list;
         $data = '';
         foreach ($ads as $ad){
-            $array = explode('[image=', $ad->MsgContent);
+            $content_e = false;
 
             foreach ($ad->t as $k=>$v){
                 if ($v == true){
                     $ad->type = self::$t[$k];
                 }
             }
+            $array = explode('[image=', $ad->MsgContent);
 
             if (empty($array[1])){
                 $image = '';
@@ -81,6 +83,9 @@ class AdController extends Controller{
             }else{
                 list($image, $content) = explode(']', $array[1]);
                 $content = explode("\n",$content);
+                if (count($content)<=1){
+                    $content_e = true;
+                }
             }
 
 
@@ -89,16 +94,16 @@ class AdController extends Controller{
        <div class="item"data-id="{$ad->Id}">
        <div class="fq-copy" id="copy_{$ad->Id}" '>
 EOT;
-    foreach ($content as $k=>$v){
-        $data.="<p class='inherit_p'>{$v}</p>";
-    }
-    $data.="{$ad->info}</div>";
+            foreach ($content as $k=>$v){
+                $data.="<p class='inherit_p'>{$v}</p>";
+            }
+            $data.="{$ad->info}</div>";
             $data .= <<<EOT
                     <h4>
                             <p>{$ad->info}</p>
                     </h4>
                     <div class="panel panel-default h_over">
-                        <div class="panel-heading">
+                        <div class="panel-heading" style="padding:10px 5px">
                             <span class="panel-title">
                             {$ad->GroupName}
                             {$ad->SendTime}
@@ -114,34 +119,43 @@ EOT;
                         <img src="{$image}" class="img-rounded img-responsive"><br>
 <button class="btn btn-info btn_copy" onmouseover="repla(this)" onmouseleave="lev(this)" data-id="{$ad->Id}" data-clipboard-action="copy" data-clipboard-target="#copy_{$ad->Id}">点击复制</button>
 EOT;
-            foreach ($content as $k=>$v){
-                if ($k != 0){
-                    if (strstr($v,'http')){
-                        $ht = explode("https",$v);
-                        foreach ($ht as $key=>$h){
-                            if ($key==0){
-                                $data.=$h;
-                            }else{
-                                $data.=<<<EOT
+            if ($content_e){
+                foreach ($content as $k=>$v){
+                    $data.="<p class='inherit_p'>{$v}</p>";
+                }
+            }else{
+                foreach ($content as $k=>$v){
+                    if ($k != 0){
+                        if (strstr($v,'http')){
+                            $ht = explode("https",$v);
+                            foreach ($ht as $key=>$h){
+                                if ($key==0){
+                                    $data.=$h;
+                                }else{
+                                    $data.=<<<EOT
 <a style="display: inherit;" target="_blank" style="word-wrap:break-word;" href="https{$h}">https{$h}</a><br>
 EOT;
+                                }
                             }
-                        }
-                    }else{
-                        $data.=<<<EOT
+                        }else{
+                            $data.=<<<EOT
 <p>{$v}</p>
 EOT;
+                        }
                     }
                 }
             }
+
             $data.=<<<EOT
 </div></div>
 <div class="ad_footer">
-<span>{$ad->coupontime}</span>
-<span class="float-right">{$ad->couponnumber}</span>
-</div>
-</div>
 EOT;
+            if ($ad->statetext){
+                $data.="<span class='statetext'>{$ad->statetext}</span>";
+            }else{
+                $data.="<span>{$ad->coupontime}</span><span class='float-right'>{$ad->couponnumber}</span>";
+            }
+            $data.="</div></div>";
         }
         return $data;
     }

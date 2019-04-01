@@ -11,9 +11,9 @@
     <title>广告平台</title>
 
     <!-- Scripts -->
-    {{--<script src="{{ asset('js/app.js') }}" defer></script>--}}
+{{--<script src="{{ asset('js/app.js') }}" defer></script>--}}
 
-    <!-- Fonts -->
+<!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet" type="text/css">
 
@@ -89,6 +89,15 @@
             width: 250px;
             height: 605px;
             margin-bottom: 40px;
+        }
+        .item_fix{
+            width: 240px;
+            display: inline-block;
+            height: 0;
+            background-color: #faebd7;
+            padding: 0;
+            overflow: hidden!important;
+            vertical-align: top
         }
         .h_over{
             height: 605px;
@@ -166,7 +175,7 @@
         }
         .multiselect-group{
             text-align: center;
-            
+
         }
         .mutip{
             display: block;
@@ -187,7 +196,7 @@
         }
 
         .item:hover .btn_copy{ display:block;}
-        
+
         .fq-copy{
             background-color: rgba(92,173,255,1);
             color: #fff;
@@ -204,6 +213,11 @@
 
         .inherit_p{
             text-align: left;
+        }
+        .statetext{
+            display: inline-block;
+            width: 100%;
+            text-align: center;
         }
 
     </style>
@@ -265,7 +279,16 @@
         </div>
     </form>
 
-    <div id="content" class="itemlist" style="width: calc(100% - 180px)"></div>
+    <div id="content" class="itemlist" style="width: calc(100% - 180px)">
+        {{--<span class="item_fix">&nbsp;</span>--}}
+        {{--<span class="item_fix">&nbsp;</span>--}}
+        {{--<span class="item_fix">&nbsp;</span>--}}
+        {{--<span class="item_fix">&nbsp;</span>--}}
+        {{--<span class="item_fix">&nbsp;</span>--}}
+        {{--<span class="item_fix">&nbsp;</span>--}}
+        {{--<span class="item_fix">&nbsp;</span>--}}
+        {{--<span class="item_fix">&nbsp;</span>--}}
+    </div>
 
     <div class="toTop" onclick=" $('body,html').animate({scrollTop:0},500);">
         <img style="width: 40px" src="{{ asset('/back.png') }}">
@@ -302,6 +325,7 @@
                     loading.hide();
                 });
             }
+
             loadingEffect();
 
             var search = $("#tb_keyword").val();
@@ -313,15 +337,18 @@
             var is_guoye = $("#is_guoye").is(':checked');
             var is_yugao = $("#is_yugao").is(':checked');
 
+            function initData(){
+                $.ajax({
+                    type: "post",
+                    url: "/ads",
+                    data: {'_token':'{{csrf_token()}}',id:'0',multiple:'0',search:search,is_weixinwenan:is_weixinwenan,is_dis:is_dis,is_tqg:is_tqg,is_ju:is_ju,is_richang:is_richang,is_guoye:is_guoye,is_yugao:is_yugao},
+                    success: function(data){
+                        $('#content').append(data);
+                    }
+                });
+            }
 
-            $.ajax({
-                type: "post",
-                url: "/ads",
-                data: {'_token':'{{csrf_token()}}',id:'0',multiple:'0',search:search,is_weixinwenan:is_weixinwenan,is_dis:is_dis,is_tqg:is_tqg,is_ju:is_ju,is_richang:is_richang,is_guoye:is_guoye,is_yugao:is_yugao},
-                success: function(data){
-                    $('#content').append(data);
-                }
-            });
+            initData();
 
             var range = 300;             //距下边界长度/单位px
             var totalheight = 0;
@@ -347,7 +374,9 @@
                         data: {'_token':'{{csrf_token()}}',id:id,multiple:multiple,search:search,is_weixinwenan:is_weixinwenan,is_dis:is_dis,is_tqg:is_tqg,is_ju:is_ju,is_richang:is_richang,is_guoye:is_guoye,is_yugao:is_yugao},
                         // dataType: "json",
                         success: function(data){
-                            $('#content').append(data);
+                            if (data != ''){
+                                $('#content').append(data);
+                            }
                         }
                     });
                 }
@@ -371,7 +400,9 @@
                     data: {'_token':'{{csrf_token()}}',id:'0',multiple:multiple,search:search,is_weixinwenan:is_weixinwenan,is_dis:is_dis,is_tqg:is_tqg,is_ju:is_ju,is_richang:is_richang,is_guoye:is_guoye,is_yugao:is_yugao},
                     success: function(data){
                         $('#content').empty();
-                        $('#content').append(data);
+                        setTimeout(function () {
+                            $('#content').append(data);
+                        }, 100);
                     }
                 });
             })
@@ -402,7 +433,7 @@
 
         new ClipboardJS('.btn_copy',{
             text: function(trigger) {
-               $(trigger).text('已复制');
+                $(trigger).text('已复制');
             }
         })
 
